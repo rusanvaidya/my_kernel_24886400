@@ -40,8 +40,6 @@ def save_sets(X_train=None, y_train=None, X_val=None, y_val=None, X_test=None, y
     path : str
         Path to the folder where the sets will be saved (default: '../data/processed/')
 
-    Returns
-    -------
     """
     import numpy as np
 
@@ -161,16 +159,25 @@ def data_cleaning(df, num_columns=None, cat_columns=None,
     """
     Generalized function to clean data, handle missing values, and standardize specific columns.
 
-    Parameters:
-    df (pd.DataFrame): The input dataframe to clean.
-    num_columns (list): List of numerical columns to impute. If None, all numerical columns will be considered.
-    cat_columns (list): List of categorical columns to impute. If None, all categorical columns will be considered.
-    num_impute_strategy (str): Strategy to impute numerical columns. Default is 'mean'.
-    cat_impute_strategy (str): Strategy to impute categorical columns. Default is 'most_frequent'.
-    special_column_transformations (dict): Dictionary where key is column name and value is the transformation function.
+    Parameters
+    ----------
+    df: pd.DataFrame 
+        The input dataframe to clean.
+    num_columns: list
+        List of numerical columns to impute. If None, all numerical columns will be considered.
+    cat_columns: list
+        List of categorical columns to impute. If None, all categorical columns will be considered.
+    num_impute_strategy: str
+        Strategy to impute numerical columns. Default is 'mean'.
+    cat_impute_strategy: str
+        Strategy to impute categorical columns. Default is 'most_frequent'.
+    special_column_transformations: dict
+        Dictionary where key is column name and value is the transformation function.
 
-    Returns:
-    pd.DataFrame: Cleaned dataframe.
+    Returns
+    -------
+    pd.DataFrame
+        Cleaned dataframe.
     """
     import pandas as pd
     import numpy as np
@@ -208,12 +215,18 @@ def distribution_plot(df, x, kind="hist", kde=False):
     """
     Function to generate distribution plots: histogram, KDE, boxplot, violinplot.
     
-    Parameters:
-    df : DataFrame - The data to plot.
-    x : str - The column name to plot.
-    kind : str - Type of plot to create. Options: 'hist', 'kdeplot', 'boxplot', 'violinplot'.
-    kde : bool - Whether to add KDE curve to the histogram (only applicable for 'hist').
-    hue : str - Grouping variable that will produce different colors in the plot.
+    Parameters
+    ----------
+    df: pd.DataFrame
+        The data to plot.
+    x : str
+        The column name to plot.
+    kind : str
+        Type of plot to create. Options: 'hist', 'kdeplot', 'boxplot', 'violinplot'.
+    kde : bool
+        Whether to add KDE curve to the histogram (only applicable for 'hist').
+    hue : str
+        Grouping variable that will produce different colors in the plot.
     
     """
     import seaborn as sns
@@ -255,12 +268,18 @@ def categorical_plot(df, x, y=None, kind="barplot", hue=None):
     """
     Function to generate categorical plots: barplot, countplot, pointplot, stripplot, swarmplot.
     
-    Parameters:
-    df : DataFrame - The data to plot.
-    x : str - The column name for categories.
-    y : str, optional - The column name for values (if applicable).
-    kind : str - Type of plot to create. Options: 'barplot', 'countplot', 'pointplot', 'stripplot', 'swarmplot'.
-    hue : str, optional - Grouping variable that will produce different colors in the plot.
+    Parameters
+    ----------
+    df : DataFrame
+        The data to plot.
+    x : str
+        The column name for categories.
+    y : str, optional
+        The column name for values (if applicable).
+    kind : str
+        Type of plot to create. Options: 'barplot', 'countplot', 'pointplot', 'stripplot', 'swarmplot'.
+    hue : str, optional
+        Grouping variable that will produce different colors in the plot.
     """
     import seaborn as sns
     import matplotlib.pyplot as plt
@@ -291,12 +310,18 @@ def relationship_plot(df, x, y, kind="scatterplot", hue=None):
     """
     Function to generate relationship plots: scatterplot, lineplot, pairplot, jointplot.
     
-    Parameters:
-    df : DataFrame - The data to plot.
-    x : str - The column name for the x-axis.
-    y : str - The column name for the y-axis.
-    kind : str - Type of plot to create. Options: 'scatterplot', 'lineplot', 'pairplot', 'jointplot'.
-    hue : str, optional - Grouping variable that will produce different colors in the plot.
+    Parameters
+    ----------
+    df : DataFrame
+        The data to plot.
+    x : str
+        The column name for the x-axis.
+    y : str
+        The column name for the y-axis.
+    kind : str
+        Type of plot to create. Options: 'scatterplot', 'lineplot', 'pairplot', 'jointplot'.
+    hue : str, optional
+        Grouping variable that will produce different colors in the plot.
     """
     import seaborn as sns
     import matplotlib.pyplot as plt
@@ -323,7 +348,8 @@ def plot_confusion_matrix(y_true, y_pred, labels=None, normalize=False, cmap="Bl
     """
     Function to plot confusion matrix using Seaborn and Matplotlib.
     
-    Parameters:
+    Parameters
+    ----------
     y_true : array-like of shape (n_samples,)
         True labels.
     y_pred : array-like of shape (n_samples,)
@@ -350,3 +376,18 @@ def plot_confusion_matrix(y_true, y_pred, labels=None, normalize=False, cmap="Bl
     plt.xlabel('Predicted Labels')
     plt.ylabel('True Labels')
     plt.title('Confusion Matrix')
+
+def roc_curve_plot(y, y_preds):
+    import matplotlib.pyplot as plt
+    from sklearn.metrics import roc_curve, roc_auc_score
+
+    roc_auc = roc_auc_score(y, y_preds)
+
+    fpr, tpr, thresholds = roc_curve(y, y_preds)
+    plt.figure(figsize=(8, 6))
+    plt.plot(fpr, tpr, color='blue', label=f'ROC Curve (area = {roc_auc:.4f})')
+    plt.plot([0, 1], [0, 1], color='red', linestyle='--')
+    plt.xlabel('False Positive Rate')
+    plt.ylabel('True Positive Rate')
+    plt.title('Receiver Operating Characteristic (ROC) Curve')
+    plt.legend(loc="lower right")

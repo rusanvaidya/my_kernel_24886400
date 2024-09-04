@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "my_krml_24886400"
-version = "0.0.1"
+version = "2024.0.0.5"
 description = "A python package to shorten ML codes"
 authors = ["Rusan"]
 license = "MIT"
