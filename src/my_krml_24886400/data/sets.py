@@ -389,13 +389,13 @@ def confusion_matrix_plot(y_true, y_pred, cmap="Blues"):
     plt.ylabel('True Labels')
     plt.title('Confusion Matrix')
 
-def get_gdrive_data(file_id):
+def get_data_from_gdrive(url):
     """
-    Downloads a CSV file directly from Google Drive, loads it into a DataFrame, 
-    and removes the CSV file after loading it.
+    Downloads a CSV file directly from Google Drive if it doesn't exist locally,
+    loads it into a DataFrame, and removes the CSV file after loading it.
 
     Parameters:
-    file_id (str): Google Drive file ID of the CSV file.
+    url (str): Google Drive URL of the CSV file.
 
     Returns:
     pd.DataFrame: DataFrame containing the contents of the CSV file.
@@ -403,27 +403,79 @@ def get_gdrive_data(file_id):
     import gdown
     import os
     import pandas as pd
+
+    # Extract file ID from the URL
+    file_id = url.split('/')[5]
     
-    # Google Drive URL and file path
-    file_url = f'https://drive.google.com/uc?id={file_id}'
-    csv_file_path = 'dataset.csv'
+    # Use the file ID as part of the filename to avoid filename argument
+    filename = f"../../data/{file_id}.csv"
     
-    # Download the CSV file
-    gdown.download(file_url, csv_file_path, quiet=False)
-    
-    # Load the CSV file into a DataFrame
-    try:
-        df = pd.read_csv(csv_file_path)
+    # Check if the file already exists locally
+    if os.path.exists(filename):
+        print(f"{filename} already exists. Reading the file from the local directory.")
+        try:
+            df = pd.read_csv(filename)
+            return df
+        except pd.errors.EmptyDataError:
+            print("Failed to load: the CSV file is empty or corrupt.")
+            return None
+        except pd.errors.ParserError:
+            print("Failed to load: the CSV file is improperly formatted.")
+            return None
+    else:
+        print(f"{filename} does not exist. Downloading the file from Google Drive.")
         
-        # Remove the CSV file after loading
-        os.remove(csv_file_path)
-        return df
-    except pd.errors.EmptyDataError:
-        print("Failed to load: the CSV file is empty or corrupt.")
-        return None
-    except pd.errors.ParserError:
-        print("Failed to load: the CSV file is improperly formatted.")
-        return None
+        # Google Drive URL for direct download
+        file_url = f'https://drive.google.com/uc?id={file_id}'
+        
+        # Download the file using gdown
+        try:
+            output = gdown.download(file_url, filename, quiet=True)
+        except Exception as e:
+            print(f"Failed to download the file. Error: {e}")
+            return None
+        
+        # Load the downloaded file into a DataFrame
+        if output:
+            try:
+                df = pd.read_csv(output)
+                print('Data fetch completed!')
+                return df
+            except pd.errors.EmptyDataError:
+                print("Failed to load: the CSV file is empty or corrupt.")
+                return None
+            except pd.errors.ParserError:
+                print("Failed to load: the CSV file is improperly formatted.")
+                return None
+        else:
+            print("File download failed.")
+            return None
+
+
+def merge_dataframes_on_common_columns(df_list, how='left'):
+    """
+    This function merges a list of DataFrames on their common column names.
+    
+    Args:
+    df_list (list): List of DataFrames to merge.
+    
+    Returns:
+    pd.DataFrame: A single merged DataFrame.
+    """
+    from functools import reduce
+
+    # Function to find common columns between two dataframes
+    def merge_two_dfs_on_common_columns(df1, df2):
+        common_cols = list(set(df1.columns).intersection(set(df2.columns)))
+        print(common_cols)
+        if not common_cols:
+            raise ValueError("No common columns to merge on.")
+        return pd.merge(df1, df2, on=common_cols, how=how)
+    
+    # Reduce the list of dataframes by merging them one by one
+    merged_df = reduce(merge_two_dfs_on_common_columns, df_list)
+    
+    return merged_df
 
 def clean_data(data):
     """
