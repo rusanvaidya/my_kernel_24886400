@@ -344,38 +344,6 @@ def relationship_plot(df, x, y, kind="scatterplot", hue=None):
     else:
         raise ValueError(f"Invalid 'kind' parameter. Supported types are 'scatterplot', 'lineplot', 'jointplot'.")
 
-def plot_confusion_matrix(y_true, y_pred, labels=None, normalize=False, cmap="Blues"):
-    """
-    Function to plot confusion matrix using Seaborn and Matplotlib.
-    
-    Parameters
-    ----------
-    y_true : array-like of shape (n_samples,)
-        True labels.
-    y_pred : array-like of shape (n_samples,)
-        Predicted labels.
-    labels : list, optional
-        List of labels to index the matrix. This may be used to reorder or select a subset of labels.
-    normalize : bool, optional
-        If True, normalize the confusion matrix by dividing by the sum of each row.
-    cmap : str, optional
-        Colormap for the heatmap. Default is 'Blues'.
-    
-    """
-
-    import matplotlib.pyplot as plt
-    import seaborn as sns
-    from sklearn.metrics import confusion_matrix
-
-    # Compute the confusion matrix
-    cm = confusion_matrix(y_true, y_pred, labels=labels, normalize='true' if normalize else None)
-    
-    # Create a heatmap
-    plt.figure(figsize=(8, 6))
-    sns.heatmap(cm, annot=True, fmt=".2f" if normalize else "d", cmap=cmap, xticklabels=labels, yticklabels=labels)
-    plt.xlabel('Predicted Labels')
-    plt.ylabel('True Labels')
-    plt.title('Confusion Matrix')
 
 def roc_curve_plot(y, y_preds):
     import matplotlib.pyplot as plt
@@ -391,3 +359,109 @@ def roc_curve_plot(y, y_preds):
     plt.ylabel('True Positive Rate')
     plt.title('Receiver Operating Characteristic (ROC) Curve')
     plt.legend(loc="lower right")
+
+def confusion_matrix_plot(y_true, y_pred, cmap="Blues"):
+    """
+    Function to plot confusion matrix using Seaborn and Matplotlib.
+    
+    Parameters
+    ----------
+    y_true : array-like of shape (n_samples,)
+        True labels.
+    y_pred : array-like of shape (n_samples,)
+        Predicted labels.
+    cmap : str, optional
+        Colormap for the heatmap. Default is 'Blues'.
+    
+    """
+
+    import matplotlib.pyplot as plt
+    import seaborn as sns
+    from sklearn.metrics import confusion_matrix
+
+    # Compute the confusion matrix
+    cm = confusion_matrix(y_true, y_pred)
+    
+    # Create a heatmap
+    plt.figure(figsize=(6, 4))
+    sns.heatmap(cm, annot=True, fmt="d", cmap=cmap)
+    plt.xlabel('Predicted Labels')
+    plt.ylabel('True Labels')
+    plt.title('Confusion Matrix')
+
+def get_gdrive_data(file_id):
+    """
+    Downloads a CSV file directly from Google Drive, loads it into a DataFrame, 
+    and removes the CSV file after loading it.
+
+    Parameters:
+    file_id (str): Google Drive file ID of the CSV file.
+
+    Returns:
+    pd.DataFrame: DataFrame containing the contents of the CSV file.
+    """
+    import gdown
+    import os
+    import pandas as pd
+    
+    # Google Drive URL and file path
+    file_url = f'https://drive.google.com/uc?id={file_id}'
+    csv_file_path = 'dataset.csv'
+    
+    # Download the CSV file
+    gdown.download(file_url, csv_file_path, quiet=False)
+    
+    # Load the CSV file into a DataFrame
+    try:
+        df = pd.read_csv(csv_file_path)
+        
+        # Remove the CSV file after loading
+        os.remove(csv_file_path)
+        return df
+    except pd.errors.EmptyDataError:
+        print("Failed to load: the CSV file is empty or corrupt.")
+        return None
+    except pd.errors.ParserError:
+        print("Failed to load: the CSV file is improperly formatted.")
+        return None
+
+def clean_data(data):
+    """
+    General function to clean data.
+    Removes duplicates, handles missing values, and resets index.
+    """
+    # Remove duplicates
+    data = data.drop_duplicates()
+    
+    # Handle missing values (customize as needed)
+    data = data.dropna()
+    
+    # Reset index
+    data = data.reset_index(drop=True)
+    
+    return data
+
+
+def remove_outliers(df, column):
+    """
+    Removes outliers from a specific column in a DataFrame using the IQR method.
+    
+    Parameters:
+    df (pd.DataFrame): The DataFrame containing the data.
+    column (str): The column from which to remove outliers.
+    
+    Returns:
+    pd.DataFrame: A DataFrame with outliers removed from the specified column.
+    """
+    
+    Q1 = df[column].quantile(0.25)  # 25th percentile (lower quartile)
+    Q3 = df[column].quantile(0.75)  # 75th percentile (upper quartile)
+    IQR = Q3 - Q1  # Interquartile Range
+    
+    lower_bound = Q1 - 1.5 * IQR  # Lower bound for outliers
+    upper_bound = Q3 + 1.5 * IQR  # Upper bound for outliers
+    
+    # Filter the dataframe to include only non-outliers
+    df_cleaned = df[(df[column] >= lower_bound) & (df[column] <= upper_bound)]
+    
+    return df_cleaned
