@@ -389,7 +389,7 @@ def confusion_matrix_plot(y_true, y_pred, cmap="Blues"):
     plt.ylabel('True Labels')
     plt.title('Confusion Matrix')
 
-def get_data_from_gdrive(url):
+def get_data_from_gdrive(url, file_path):
     """
     Downloads a CSV file directly from Google Drive if it doesn't exist locally,
     loads it into a DataFrame, and removes the CSV file after loading it.
@@ -408,7 +408,7 @@ def get_data_from_gdrive(url):
     file_id = url.split('/')[5]
     
     # Use the file ID as part of the filename to avoid filename argument
-    filename = f"../../data/{file_id}.csv"
+    filename = f"{file_path}/{file_id}.csv"
     
     # Check if the file already exists locally
     if os.path.exists(filename):
@@ -463,6 +463,7 @@ def merge_dataframes_on_common_columns(df_list, how='left'):
     pd.DataFrame: A single merged DataFrame.
     """
     from functools import reduce
+    import pandas as pd
 
     # Function to find common columns between two dataframes
     def merge_two_dfs_on_common_columns(df1, df2):
